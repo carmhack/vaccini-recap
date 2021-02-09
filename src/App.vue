@@ -45,7 +45,7 @@
         </b-table-column>
 
         <b-table-column field="dosi_somministrate" label="Dosi Somministrate" sortable centered v-slot="props">
-          {{ props.row.dosi_somministrate }}
+          {{ props.row.dosi_somministrate.toLocaleString() }}
         </b-table-column>
 
         <b-table-column field="percentuale_somministrazione" label="% Somministrazione" sortable centered v-slot="props">
@@ -79,7 +79,9 @@
                   <b-tag type="is-medium is-white">Seconda dose</b-tag>
                   <b-tag type="is-medium is-info">{{ somministrazioni[props.row.nome_area].seconda_dose.toLocaleString() }}</b-tag>
                 </b-taglist>
-                <category-chart :detail="somministrazioni[props.row.nome_area]" />
+                <div class="column is-8">
+                  <category-chart :detail="somministrazioni[props.row.nome_area]" />
+                </div>
               </div>
             </div>
           </article>
