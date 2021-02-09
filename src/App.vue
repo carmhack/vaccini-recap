@@ -79,8 +79,17 @@
                   <b-tag type="is-medium is-white">Seconda dose</b-tag>
                   <b-tag type="is-medium is-info">{{ somministrazioni[props.row.nome_area].seconda_dose.toLocaleString() }}</b-tag>
                 </b-taglist>
-                <div class="column is-8">
+                <div class="is-hidden-mobile">
                   <category-chart :detail="somministrazioni[props.row.nome_area]" />
+                </div>
+                <div class="block is-hidden-desktop">
+                  Le dosi totali di vaccino somministrate sono {{ somministrazioni[props.row.nome_area].totale.toLocaleString() }} (
+                    {{ somministrazioni[props.row.nome_area].sesso_maschile.toLocaleString() }} soggetti di sesso maschile, 
+                    {{ somministrazioni[props.row.nome_area].sesso_femminile.toLocaleString() }} soggetti di sesso femminile
+                  ). Di queste dosi, {{ somministrazioni[props.row.nome_area].categoria_operatori_sanitari_sociosanitari.toLocaleString() }} sono andate agli operatori sanitari / socio-sanitari,
+                  {{ somministrazioni[props.row.nome_area].categoria_personale_non_sanitario.toLocaleString() }} al personale non sanitario,
+                  {{ somministrazioni[props.row.nome_area].categoria_ospiti_rsa.toLocaleString() }} agli ospiti delle RSA,
+                  {{ somministrazioni[props.row.nome_area].categoria_over80.toLocaleString() }} agli over 80.
                 </div>
               </div>
             </div>
@@ -189,7 +198,7 @@ export default {
           .map(elem => {
             somministrazioni[nomeArea].totale += elem.totale;
             somministrazioni[nomeArea].sesso_maschile += elem.sesso_maschile;
-            somministrazioni[nomeArea].sesso_femminile += elem.sesso_femminfile;
+            somministrazioni[nomeArea].sesso_femminile += elem.sesso_femminile;
             somministrazioni[nomeArea].categoria_operatori_sanitari_sociosanitari += elem.categoria_operatori_sanitari_sociosanitari;
             somministrazioni[nomeArea].categoria_personale_non_sanitario += elem.categoria_personale_non_sanitario;
             somministrazioni[nomeArea].categoria_ospiti_rsa += elem.categoria_ospiti_rsa;
