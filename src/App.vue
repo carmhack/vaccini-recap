@@ -21,7 +21,7 @@
       </div>
     </section>
 
-    <section>
+    <section class="section">
       <b-table
         :data="data"
         :loading="isLoading"
