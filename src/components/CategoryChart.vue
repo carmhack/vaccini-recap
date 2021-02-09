@@ -14,7 +14,7 @@ export default {
         datasets: [
           {
             label: 'Data',
-            backgroundColor: '#f87979',
+            backgroundColor: '#167df0',
             data: this.getData(),
           }
         ]

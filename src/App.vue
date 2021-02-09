@@ -68,32 +68,32 @@
           <article class="media">
             <figure class="media-left">
               <p class="image is-64x64">
-                <img :src="`/images/${props.row.area}.png`">
+                <img :src="`/images/${props.row.area}.png`" alt="Stemma regione">
               </p>
             </figure>
-            <div class="media-content">
-              <div class="content">
-                <b-taglist attached>
-                  <b-tag type="is-medium is-white">Prima dose</b-tag>
-                  <b-tag type="is-medium is-info">{{ somministrazioni[props.row.nome_area].prima_dose.toLocaleString() }}</b-tag>
-                  <b-tag type="is-medium is-white">Seconda dose</b-tag>
-                  <b-tag type="is-medium is-info">{{ somministrazioni[props.row.nome_area].seconda_dose.toLocaleString() }}</b-tag>
-                </b-taglist>
-                <div class="is-hidden-mobile">
-                  <category-chart :detail="somministrazioni[props.row.nome_area]" />
-                </div>
-                <div class="block is-hidden-desktop">
-                  Le dosi totali di vaccino somministrate sono {{ somministrazioni[props.row.nome_area].totale.toLocaleString() }} (
-                    {{ somministrazioni[props.row.nome_area].sesso_maschile.toLocaleString() }} soggetti di sesso maschile, 
-                    {{ somministrazioni[props.row.nome_area].sesso_femminile.toLocaleString() }} soggetti di sesso femminile
-                  ). Di queste dosi, {{ somministrazioni[props.row.nome_area].categoria_operatori_sanitari_sociosanitari.toLocaleString() }} sono andate agli operatori sanitari / socio-sanitari,
-                  {{ somministrazioni[props.row.nome_area].categoria_personale_non_sanitario.toLocaleString() }} al personale non sanitario,
-                  {{ somministrazioni[props.row.nome_area].categoria_ospiti_rsa.toLocaleString() }} agli ospiti delle RSA,
-                  {{ somministrazioni[props.row.nome_area].categoria_over80.toLocaleString() }} agli over 80.
-                </div>
-              </div>
+            <div class="content">
+              <b-taglist attached>
+                <b-tag type="is-medium is-white">Prima dose</b-tag>
+                <b-tag type="is-medium is-info">{{ somministrazioni[props.row.nome_area].prima_dose.toLocaleString() }}</b-tag>
+                <b-tag type="is-medium is-white">Seconda dose</b-tag>
+                <b-tag type="is-medium is-info">{{ somministrazioni[props.row.nome_area].seconda_dose.toLocaleString() }}</b-tag>
+              </b-taglist>
             </div>
           </article>
+          <div style="margin-top: 20px">
+            <div class="is-hidden-mobile">
+              <category-chart :detail="somministrazioni[props.row.nome_area]" />
+            </div>
+            <div class="block is-hidden-desktop">
+              Le dosi totali di vaccino somministrate sono {{ somministrazioni[props.row.nome_area].totale.toLocaleString() }} (
+                {{ somministrazioni[props.row.nome_area].sesso_maschile.toLocaleString() }} soggetti di sesso maschile, 
+                {{ somministrazioni[props.row.nome_area].sesso_femminile.toLocaleString() }} soggetti di sesso femminile
+              ). Di queste dosi, {{ somministrazioni[props.row.nome_area].categoria_operatori_sanitari_sociosanitari.toLocaleString() }} sono andate agli operatori sanitari / socio-sanitari,
+              {{ somministrazioni[props.row.nome_area].categoria_personale_non_sanitario.toLocaleString() }} al personale non sanitario,
+              {{ somministrazioni[props.row.nome_area].categoria_ospiti_rsa.toLocaleString() }} agli ospiti delle RSA,
+              {{ somministrazioni[props.row.nome_area].categoria_over80.toLocaleString() }} agli over 80.
+            </div>
+          </div>
         </template>
       </b-table>
     </section>
