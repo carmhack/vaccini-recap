@@ -23,18 +23,13 @@
 
     <section class="section">
       <b-table
-        :data="data"
+        :data="vacciniSummary"
         :loading="isLoading"
         detailed
         :opened-detailed="[1]"
-        detail-key="nome_area"
-        :show-detail-icon="true"
         :striped="true"
-        default-sort-direction="asc"
-        sort-icon="arrow-up"
-        sort-icon-size="is-small"
+        detail-key="nome_area"
         default-sort="nome_area"
-        :has-mobile-cards="true"
       >
         <b-table-column field="nome_area" label="Regione" sortable v-slot="props">
           {{ props.row.nome_area }}
@@ -74,25 +69,25 @@
             <div class="content">
               <b-taglist attached>
                 <b-tag type="is-medium is-white">Prima dose</b-tag>
-                <b-tag type="is-medium is-info">{{ somministrazioni[props.row.nome_area].prima_dose.toLocaleString() }}</b-tag>
+                <b-tag type="is-medium is-info">{{ data[props.row.nome_area].prima_dose.toLocaleString() }}</b-tag>
                 <b-tag type="is-medium is-white">Seconda dose</b-tag>
-                <b-tag type="is-medium is-info">{{ somministrazioni[props.row.nome_area].seconda_dose.toLocaleString() }}</b-tag>
+                <b-tag type="is-medium is-info">{{ data[props.row.nome_area].seconda_dose.toLocaleString() }}</b-tag>
               </b-taglist>
             </div>
           </article>
           <div style="margin-top: 20px">
             <div class="is-hidden-mobile">
-              <category-chart :detail="somministrazioni[props.row.nome_area]" />
+              <category-chart :detail="data[props.row.nome_area]" />
             </div>
             <div class="block is-hidden-desktop">
-              Le dosi totali di vaccino somministrate sono {{ somministrazioni[props.row.nome_area].totale.toLocaleString() }} 
-              ({{ somministrazioni[props.row.nome_area].sesso_maschile.toLocaleString() }} soggetti di sesso maschile, 
-              {{ somministrazioni[props.row.nome_area].sesso_femminile.toLocaleString() }} soggetti di sesso femminile). 
+              Le dosi totali di vaccino somministrate sono {{ data[props.row.nome_area].totale.toLocaleString() }} 
+              ({{ data[props.row.nome_area].sesso_maschile.toLocaleString() }} soggetti di sesso maschile, 
+              {{ data[props.row.nome_area].sesso_femminile.toLocaleString() }} soggetti di sesso femminile). 
               Di queste dosi, 
-              {{ somministrazioni[props.row.nome_area].categoria_operatori_sanitari_sociosanitari.toLocaleString() }} sono andate agli operatori sanitari / socio-sanitari,
-              {{ somministrazioni[props.row.nome_area].categoria_personale_non_sanitario.toLocaleString() }} al personale non sanitario,
-              {{ somministrazioni[props.row.nome_area].categoria_ospiti_rsa.toLocaleString() }} agli ospiti delle RSA,
-              {{ somministrazioni[props.row.nome_area].categoria_over80.toLocaleString() }} agli over 80.
+              {{ data[props.row.nome_area].categoria_operatori_sanitari_sociosanitari.toLocaleString() }} sono andate agli operatori sanitari / socio-sanitari,
+              {{ data[props.row.nome_area].categoria_personale_non_sanitario.toLocaleString() }} al personale non sanitario,
+              {{ data[props.row.nome_area].categoria_ospiti_rsa.toLocaleString() }} agli ospiti delle RSA,
+              {{ data[props.row.nome_area].categoria_over80.toLocaleString() }} agli over 80.
             </div>
           </div>
         </template>
@@ -102,7 +97,6 @@
 </template>
 
 <script>
-// import * as schemaSomministrazioni from './data/somministrazioni-vaccini-summary-latest.json';
 import CategoryChart from './components/CategoryChart.vue';
 
 const API_URL = 'https://api.github.com/repos/italia/covid19-opendata-vaccini/contents/';
@@ -118,15 +112,17 @@ export default {
   },
   computed: {
     totaleVacciniConsegnati() {
-      return this.data.reduce((acc, area) => acc + area.dosi_consegnate, 0).toLocaleString();
+      return this.vacciniSummary.reduce((acc, area) => acc + area.dosi_consegnate, 0).toLocaleString();
     },
     totaleVacciniSomministrati() {
-      return this.data.reduce((acc, area) => acc + area.dosi_somministrate, 0).toLocaleString();
+      return this.vacciniSummary.reduce((acc, area) => acc + area.dosi_somministrate, 0).toLocaleString();
     }
   },
   data() {
     return {
-      data: [],
+      vacciniSummary: [],
+      somministrazioniSummary: [],
+      data: {},
       isLoading: false,
       columns: [
         {
@@ -158,16 +154,15 @@ export default {
           label: 'Ultimo Aggiornamento',
         }
       ],
-      somministrazioniSummary: [],
-      somministrazioni: {},
     }
   },
   methods: {
     async loadData() {
       this.isLoading = true;
+
       const responseVaccini = await fetch(API_URL+VACCINI_SUMMARY_PATH);
       const resultVaccini = await responseVaccini.json();
-      this.data = JSON.parse(atob(resultVaccini.content)).data;
+      this.vacciniSummary = JSON.parse(atob(resultVaccini.content)).data;
 
       const responseSomministrazioni = await fetch(API_URL+SOMMINISTRAZIONI_SUMMARY_PATH);
       const resultSomministrazioni = await responseSomministrazioni.json();
@@ -175,14 +170,12 @@ export default {
       
       this.isLoading = false;
 
-      this.elaborateData();
+      this.elaborateData(this.data, this.vacciniSummary, this.somministrazioniSummary);
     },
-    elaborateData() {
-      const somministrazioni = this.somministrazioni;
-
-      this.data.map(summary => {
+    elaborateData(data, vaccini, somministrazioni) {
+      vaccini.map(summary => {
         const nomeArea = summary.nome_area;
-        somministrazioni[nomeArea] = {
+        data[nomeArea] = {
           totale: 0,
           sesso_maschile: 0,
           sesso_femminile: 0,
@@ -194,29 +187,23 @@ export default {
           seconda_dose: 0,
         }
 
-        this.somministrazioniSummary
-          .filter(elem => elem.area == summary.area)
-          .map(elem => {
-            somministrazioni[nomeArea].totale += elem.totale;
-            somministrazioni[nomeArea].sesso_maschile += elem.sesso_maschile;
-            somministrazioni[nomeArea].sesso_femminile += elem.sesso_femminile;
-            somministrazioni[nomeArea].categoria_operatori_sanitari_sociosanitari += elem.categoria_operatori_sanitari_sociosanitari;
-            somministrazioni[nomeArea].categoria_personale_non_sanitario += elem.categoria_personale_non_sanitario;
-            somministrazioni[nomeArea].categoria_ospiti_rsa += elem.categoria_ospiti_rsa;
-            somministrazioni[nomeArea].categoria_over80 += elem.categoria_over80;
-            somministrazioni[nomeArea].prima_dose += elem.prima_dose;
-            somministrazioni[nomeArea].seconda_dose += elem.seconda_dose;
+        somministrazioni
+          .filter(item => item.area == summary.area)
+          .map(item => {
+            const dataObj = data[nomeArea];
+
+            dataObj.totale += item.totale;
+            dataObj.sesso_maschile += item.sesso_maschile;
+            dataObj.sesso_femminile += item.sesso_femminile;
+            dataObj.categoria_operatori_sanitari_sociosanitari += item.categoria_operatori_sanitari_sociosanitari;
+            dataObj.categoria_personale_non_sanitario += item.categoria_personale_non_sanitario;
+            dataObj.categoria_ospiti_rsa += item.categoria_ospiti_rsa;
+            dataObj.categoria_over80 += item.categoria_over80;
+            dataObj.prima_dose += item.prima_dose;
+            dataObj.seconda_dose += item.seconda_dose;
           });
       })
     }
   }
 }
 </script>
-
-<style lang="scss" scoped>
-.content.is-vcentered {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-}
-</style>
