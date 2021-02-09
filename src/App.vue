@@ -5,8 +5,8 @@
         <div class="content is-vcentered">
           <img src="/images/logo.png" alt="Primula">
           <p class="title">
-            Vaccini Tracker
-            
+            Vaccini Recap
+            <br/>
             <span class="subtitle">
               Creato da <a href="https://www.docety.com/coachs/27619/dettagli/Grimaldi+Adriano" style="text-decoration: underline;">Adriano Grimaldi</a>
             </span>
@@ -85,10 +85,11 @@
               <category-chart :detail="somministrazioni[props.row.nome_area]" />
             </div>
             <div class="block is-hidden-desktop">
-              Le dosi totali di vaccino somministrate sono {{ somministrazioni[props.row.nome_area].totale.toLocaleString() }} (
-                {{ somministrazioni[props.row.nome_area].sesso_maschile.toLocaleString() }} soggetti di sesso maschile, 
-                {{ somministrazioni[props.row.nome_area].sesso_femminile.toLocaleString() }} soggetti di sesso femminile
-              ). Di queste dosi, {{ somministrazioni[props.row.nome_area].categoria_operatori_sanitari_sociosanitari.toLocaleString() }} sono andate agli operatori sanitari / socio-sanitari,
+              Le dosi totali di vaccino somministrate sono {{ somministrazioni[props.row.nome_area].totale.toLocaleString() }} 
+              ({{ somministrazioni[props.row.nome_area].sesso_maschile.toLocaleString() }} soggetti di sesso maschile, 
+              {{ somministrazioni[props.row.nome_area].sesso_femminile.toLocaleString() }} soggetti di sesso femminile). 
+              Di queste dosi, 
+              {{ somministrazioni[props.row.nome_area].categoria_operatori_sanitari_sociosanitari.toLocaleString() }} sono andate agli operatori sanitari / socio-sanitari,
               {{ somministrazioni[props.row.nome_area].categoria_personale_non_sanitario.toLocaleString() }} al personale non sanitario,
               {{ somministrazioni[props.row.nome_area].categoria_ospiti_rsa.toLocaleString() }} agli ospiti delle RSA,
               {{ somministrazioni[props.row.nome_area].categoria_over80.toLocaleString() }} agli over 80.
