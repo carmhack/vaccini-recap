@@ -1,111 +1,139 @@
 <template>
-  <section class="section">
-    <section class="hero is-info">
+  <div>
+    <section class="hero is-info has-text-centered">
       <div class="hero-body">
         <div class="content is-vcentered">
           <img src="/images/logo.png" alt="Primula">
-          <p class="title">
-            Vaccini Recap
-            <br/>
-            <span class="subtitle">
-              Creato da <a href="https://www.docety.com/coachs/27619/dettagli/Grimaldi+Adriano" style="text-decoration: underline;">Adriano Grimaldi</a>
-            </span>
+          <p class="title is-3">Dashboard Vaccini</p>
+          <p class="subtitle is-5">
+            Creato da <a href="https://www.docety.com/coachs/27619/dettagli/Grimaldi+Adriano" style="text-decoration: underline;">Adriano Grimaldi</a>
           </p>
         </div>
-         <b-taglist attached>
-            <b-tag type="is-large is-white">Totale vaccini consegnati</b-tag>
-            <b-tag type="is-large is-primary">{{ totaleVacciniConsegnati }}</b-tag>
-            <b-tag type="is-large is-white">Totale vaccini somministrati</b-tag>
-            <b-tag type="is-large is-primary">{{ totaleVacciniSomministrati }}</b-tag>
-          </b-taglist>
       </div>
     </section>
 
-    <section class="section">
-      <b-table
-        :data="vacciniSummary"
-        :loading="isLoading"
-        detailed
-        :opened-detailed="[1]"
-        :striped="true"
-        detail-key="nome_area"
-        default-sort="nome_area"
-      >
-        <b-table-column field="nome_area" label="Regione" sortable v-slot="props">
-          {{ props.row.nome_area }}
-        </b-table-column>
+    <section class="section is-centered">
+      <div class="box">
+        <h1 class="title is-3">Dati riassuntivi</h1>
 
-        <b-table-column field="dosi_consegnate" label="Dosi Consegnate" sortable centered v-slot="props">
-          {{ props.row.dosi_consegnate.toLocaleString() }}
-        </b-table-column>
+        <b-taglist attached>
+          <b-tag type="is-large is-light">Vaccini consegnati</b-tag>
+          <b-tag type="is-large is-success">{{ totaleVacciniConsegnati }}</b-tag>
+          
+          <b-tag type="is-large is-light">Vaccini somministrati</b-tag>
+          <b-tag type="is-large is-success">{{ totaleVacciniSomministrati }}</b-tag>
+        </b-taglist>
 
-        <b-table-column field="dosi_somministrate" label="Dosi Somministrate" sortable centered v-slot="props">
-          {{ props.row.dosi_somministrate.toLocaleString() }}
-        </b-table-column>
-
-        <b-table-column field="percentuale_somministrazione" label="% Somministrazione" sortable centered v-slot="props">
-          <span v-if="props.row.percentuale_somministrazione < 50" class="tag is-medium is-danger">
-            {{ props.row.percentuale_somministrazione }}
-          </span>
-          <span v-if="props.row.percentuale_somministrazione >= 50 && props.row.percentuale_somministrazione < 80" class="tag is-medium is-warning">
-            {{ props.row.percentuale_somministrazione }}
-          </span>
-          <span v-else class="tag is-medium is-success">
-            {{ props.row.percentuale_somministrazione }}
-          </span>
-        </b-table-column>
-
-        <b-table-column field="ultimo_aggiornamento" label="Ultimo Aggiornamento" v-slot="props">
-          {{ new Date(props.row.ultimo_aggiornamento).toLocaleString() }}
-        </b-table-column>
-
-        <template #detail="props">
-          <article class="media">
-            <figure class="media-left">
-              <p class="image is-64x64">
-                <img :src="`/images/${props.row.area}.png`" alt="Stemma regione">
+        <b-collapse class="card" animation="slide" aria-id="contentIdForA11y3">
+          <template #trigger="props">
+            <div
+              class="card-header"
+              role="button"
+              aria-controls="contentIdForA11y3">
+              <p class="card-header-title">
+                Fasce anagrafiche
               </p>
-            </figure>
+              <a class="card-header-icon">
+                <b-icon
+                  :icon="props.open ? 'menu-down' : 'menu-up'">
+                </b-icon>
+              </a>
+            </div>
+          </template>
+          <div class="card-content">
             <div class="content">
-              <b-taglist attached>
-                <b-tag type="is-medium is-white">Prima dose</b-tag>
-                <b-tag type="is-medium is-info">{{ data[props.row.nome_area].prima_dose.toLocaleString() }}</b-tag>
-                <b-tag type="is-medium is-white">Seconda dose</b-tag>
-                <b-tag type="is-medium is-info">{{ data[props.row.nome_area].seconda_dose.toLocaleString() }}</b-tag>
-              </b-taglist>
-            </div>
-          </article>
-          <div style="margin-top: 20px">
-            <div class="is-hidden-mobile">
-              <category-chart :detail="data[props.row.nome_area]" />
-            </div>
-            <div class="block is-hidden-desktop">
-              Le dosi totali di vaccino somministrate sono {{ data[props.row.nome_area].totale.toLocaleString() }} 
-              ({{ data[props.row.nome_area].sesso_maschile.toLocaleString() }} soggetti di sesso maschile, 
-              {{ data[props.row.nome_area].sesso_femminile.toLocaleString() }} soggetti di sesso femminile). 
-              Di queste dosi, 
-              {{ data[props.row.nome_area].categoria_operatori_sanitari_sociosanitari.toLocaleString() }} sono andate agli operatori sanitari / socio-sanitari,
-              {{ data[props.row.nome_area].categoria_personale_non_sanitario.toLocaleString() }} al personale non sanitario,
-              {{ data[props.row.nome_area].categoria_ospiti_rsa.toLocaleString() }} agli ospiti delle RSA,
-              {{ data[props.row.nome_area].categoria_over80.toLocaleString() }} agli over 80.
+              <anagrafica-chart v-if="!isLoading" :data="anagraficaSummary" />
             </div>
           </div>
-        </template>
-      </b-table>
+        </b-collapse>
+      </div>
+
+      <div style="margin-top: 20px">
+        <h1 class="title is-3">Tabella Regioni</h1>
+        <b-table
+          :data="vacciniSummary"
+          :loading="isLoading"
+          detailed
+          :opened-detailed="[1]"
+          :striped="true"
+          detail-key="nome_area"
+          default-sort="nome_area"
+        >
+          <b-table-column field="nome_area" label="Regione" sortable v-slot="props">
+            {{ props.row.nome_area }}
+          </b-table-column>
+
+          <b-table-column field="dosi_consegnate" label="Dosi Consegnate" sortable centered v-slot="props">
+            {{ props.row.dosi_consegnate.toLocaleString() }}
+          </b-table-column>
+
+          <b-table-column field="dosi_somministrate" label="Dosi Somministrate" sortable centered v-slot="props">
+            {{ props.row.dosi_somministrate.toLocaleString() }}
+          </b-table-column>
+
+          <b-table-column field="percentuale_somministrazione" label="% Somministrazione" sortable centered v-slot="props">
+            <span v-if="props.row.percentuale_somministrazione < 50" class="tag is-medium is-danger">
+              {{ props.row.percentuale_somministrazione }}
+            </span>
+            <span v-if="props.row.percentuale_somministrazione >= 50 && props.row.percentuale_somministrazione < 80" class="tag is-medium is-warning">
+              {{ props.row.percentuale_somministrazione }}
+            </span>
+            <span v-else class="tag is-medium is-success">
+              {{ props.row.percentuale_somministrazione }}
+            </span>
+          </b-table-column>
+
+          <b-table-column field="ultimo_aggiornamento" label="Ultimo Aggiornamento" v-slot="props">
+            {{ new Date(props.row.ultimo_aggiornamento).toLocaleString() }}
+          </b-table-column>
+
+          <template #detail="props">
+            <article class="media">
+              <figure class="media-left">
+                <p class="image is-64x64">
+                  <img :src="`/images/${props.row.area}.png`" alt="Stemma regione">
+                </p>
+              </figure>
+              <div class="content">
+                <b-taglist attached>
+                  <b-tag type="is-medium is-white">Prima dose</b-tag>
+                  <b-tag type="is-medium is-info">{{ data[props.row.nome_area].prima_dose.toLocaleString() }}</b-tag>
+                  <b-tag type="is-medium is-white">Seconda dose</b-tag>
+                  <b-tag type="is-medium is-info">{{ data[props.row.nome_area].seconda_dose.toLocaleString() }}</b-tag>
+                </b-taglist>
+              </div>
+            </article>
+            <div style="margin-top: 20px">
+              <div class="is-hidden-mobile">
+                <categorie-chart v-if="!isLoading" :data="data[props.row.nome_area]" />
+              </div>
+              <div class="block is-hidden-tablet">
+                Le dosi totali di vaccino somministrate sono {{ data[props.row.nome_area].totale.toLocaleString() }} 
+                ({{ data[props.row.nome_area].sesso_maschile.toLocaleString() }} soggetti di sesso maschile, 
+                {{ data[props.row.nome_area].sesso_femminile.toLocaleString() }} soggetti di sesso femminile). 
+                Di queste dosi, 
+                {{ data[props.row.nome_area].categoria_operatori_sanitari_sociosanitari.toLocaleString() }} sono andate agli operatori sanitari / socio-sanitari,
+                {{ data[props.row.nome_area].categoria_personale_non_sanitario.toLocaleString() }} al personale non sanitario,
+                {{ data[props.row.nome_area].categoria_ospiti_rsa.toLocaleString() }} agli ospiti delle RSA,
+                {{ data[props.row.nome_area].categoria_over80.toLocaleString() }} agli over 80.
+              </div>
+            </div>
+          </template>
+        </b-table>
+      </div>
     </section>
-  </section>
+  </div>
 </template>
 
 <script>
-import CategoryChart from './components/CategoryChart.vue';
-
-const API_URL = 'https://api.github.com/repos/italia/covid19-opendata-vaccini/contents/';
-const VACCINI_SUMMARY_PATH = 'dati/vaccini-summary-latest.json';
-const SOMMINISTRAZIONI_SUMMARY_PATH = 'dati/somministrazioni-vaccini-summary-latest.json';
+import api from './api';
+import CategorieChart from './components/CategorieChart.vue';
+import AnagraficaChart from './components/AnagraficaChart.vue';
 
 export default {
   components: {
-    CategoryChart
+    CategorieChart,
+    AnagraficaChart
   },
   mounted() {
     this.loadData();
@@ -122,6 +150,7 @@ export default {
     return {
       vacciniSummary: [],
       somministrazioniSummary: [],
+      anagraficaSummary: [],
       data: {},
       isLoading: false,
       columns: [
@@ -160,13 +189,17 @@ export default {
     async loadData() {
       this.isLoading = true;
 
-      const responseVaccini = await fetch(API_URL+VACCINI_SUMMARY_PATH);
+      const responseVaccini = await fetch(api.API_URL+api.VACCINI_SUMMARY_PATH);
       const resultVaccini = await responseVaccini.json();
       this.vacciniSummary = JSON.parse(atob(resultVaccini.content)).data;
 
-      const responseSomministrazioni = await fetch(API_URL+SOMMINISTRAZIONI_SUMMARY_PATH);
+      const responseSomministrazioni = await fetch(api.API_URL+api.SOMMINISTRAZIONI_SUMMARY_PATH);
       const resultSomministrazioni = await responseSomministrazioni.json();
       this.somministrazioniSummary = JSON.parse(atob(resultSomministrazioni.content)).data;
+
+      const responseAnagrafica = await fetch(api.API_URL+api.ANAGRAFICA_SUMMARY_PATH);
+      const resultAnagrafica = await responseAnagrafica.json();
+      this.anagraficaSummary = JSON.parse(atob(resultAnagrafica.content)).data;
       
       this.isLoading = false;
 
@@ -207,3 +240,9 @@ export default {
   }
 }
 </script>
+
+<style lang="scss">
+body {
+  font-family: 'Open Sans', sans-serif !important;
+}
+</style>

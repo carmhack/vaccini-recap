@@ -2,7 +2,7 @@
 import { Bar } from 'vue-chartjs'
 
 export default {
-  name: 'CategoryChart',
+  name: 'CategorieChart',
   extends: Bar,
   mounted() {
     this.renderChart(this.chartdata, this.options);
@@ -15,7 +15,7 @@ export default {
           {
             label: 'Data',
             backgroundColor: '#167df0',
-            data: this.getData(),
+            data: this.createData(),
           }
         ]
       },
@@ -26,7 +26,7 @@ export default {
     }
   },
   methods: {
-    getData() {
+    createData() {
       const toRet = [];
       const filters = [
         'totale',
@@ -35,16 +35,16 @@ export default {
         'categoria_ospiti_rsa',
         'categoria_over80'
       ];
-      Object.keys(this.detail).filter(key => {
+      Object.keys(this.data).filter(key => {
         if (filters.includes(key)) {
-          toRet.push(this.detail[key]);
+          toRet.push(this.data[key]);
         }
       })
       return toRet;
     }
   },
   props: {
-    detail: Object
+    data: Object
   }
 }
 </script>
