@@ -37,9 +37,7 @@ export default {
     }
   },
   props: {
-    data: {
-      default: () => []
-    }
+    data: Array
   }
 }
 </script>

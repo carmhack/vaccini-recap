@@ -50,6 +50,7 @@
 
       <div style="margin-top: 20px">
         <h1 class="title is-3">Tabella Regioni</h1>
+
         <b-table
           :data="vacciniSummary"
           :loading="isLoading"
@@ -104,10 +105,7 @@
               </div>
             </article>
             <div style="margin-top: 20px">
-              <div class="is-hidden-mobile">
-                <categorie-chart v-if="!isLoading" :data="data[props.row.nome_area]" />
-              </div>
-              <div class="block is-hidden-tablet">
+              <div class="block">
                 Le dosi totali di vaccino somministrate sono {{ data[props.row.nome_area].totale.toLocaleString() }} 
                 ({{ data[props.row.nome_area].sesso_maschile.toLocaleString() }} soggetti di sesso maschile, 
                 {{ data[props.row.nome_area].sesso_femminile.toLocaleString() }} soggetti di sesso femminile). 
@@ -116,6 +114,9 @@
                 {{ data[props.row.nome_area].categoria_personale_non_sanitario.toLocaleString() }} al personale non sanitario,
                 {{ data[props.row.nome_area].categoria_ospiti_rsa.toLocaleString() }} agli ospiti delle RSA,
                 {{ data[props.row.nome_area].categoria_over80.toLocaleString() }} agli over 80.
+              </div>
+              <div class="is-hidden-mobile">
+                <forniture-chart v-if="!isLoading" :data="data[props.row.nome_area].forniture" />
               </div>
             </div>
           </template>
@@ -127,13 +128,13 @@
 
 <script>
 import api from './api';
-import CategorieChart from './components/CategorieChart.vue';
 import AnagraficaChart from './components/AnagraficaChart.vue';
+import FornitureChart from './components/FornitureChart.vue';
 
 export default {
   components: {
-    CategorieChart,
-    AnagraficaChart
+    AnagraficaChart,
+    FornitureChart
   },
   mounted() {
     this.loadData();
@@ -151,6 +152,7 @@ export default {
       vacciniSummary: [],
       somministrazioniSummary: [],
       anagraficaSummary: [],
+      consegneSummary: [],
       data: {},
       isLoading: false,
       columns: [
@@ -200,12 +202,16 @@ export default {
       const responseAnagrafica = await fetch(api.API_URL+api.ANAGRAFICA_SUMMARY_PATH);
       const resultAnagrafica = await responseAnagrafica.json();
       this.anagraficaSummary = JSON.parse(atob(resultAnagrafica.content)).data;
+
+      const responseConsegne = await fetch(api.API_URL+api.CONSEGNE_VACCINI_PATH);
+      const resultConsegne = await responseConsegne.json();
+      this.consegneSummary = JSON.parse(atob(resultConsegne.content)).data;
       
       this.isLoading = false;
 
-      this.elaborateData(this.data, this.vacciniSummary, this.somministrazioniSummary);
+      this.elaborateData(this.data, this.vacciniSummary, this.somministrazioniSummary, this.consegneSummary);
     },
-    elaborateData(data, vaccini, somministrazioni) {
+    elaborateData(data, vaccini, somministrazioni, consegne) {
       vaccini.map(summary => {
         const nomeArea = summary.nome_area;
         data[nomeArea] = {
@@ -218,6 +224,7 @@ export default {
           categoria_over80: 0,
           prima_dose: 0,
           seconda_dose: 0,
+          forniture: [],
         }
 
         somministrazioni
@@ -235,6 +242,20 @@ export default {
             dataObj.prima_dose += item.prima_dose;
             dataObj.seconda_dose += item.seconda_dose;
           });
+
+        consegne
+          .filter(item => item.area === summary.area)
+          .map(item => {
+            const elencoForniture = data[nomeArea].forniture;
+
+            const fornitore = item.fornitore;
+            const itemIndex = elencoForniture.findIndex(elem => elem.name === fornitore);
+            if (itemIndex !== -1) {
+              elencoForniture[itemIndex].totale += item.numero_dosi;
+            } else {
+              elencoForniture.push({ name: item.fornitore, totale: item.numero_dosi });
+            }
+          })
       })
     }
   }
