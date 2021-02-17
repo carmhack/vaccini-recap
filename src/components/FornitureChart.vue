@@ -27,7 +27,7 @@ export default {
   },
   methods: {
     getLabels() {
-      return this.data.map(fornitore => fornitore.name);
+      return this.data.map(fornitore => fornitore.nome);
     },
     createData() {
       return this.data.map(fornitore => fornitore.totale);

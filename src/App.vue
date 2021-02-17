@@ -5,7 +5,7 @@
         <div class="content is-vcentered">
           <img src="/images/logo.png" alt="Primula">
           <p class="title is-3">Dashboard Vaccini</p>
-          <p class="subtitle is-5">
+          <p class="subtitle is-4">
             Creato da <a href="https://www.docety.com/coachs/27619/dettagli/Grimaldi+Adriano" style="text-decoration: underline;">Adriano Grimaldi</a>
           </p>
         </div>
@@ -14,14 +14,21 @@
 
     <section class="section is-centered">
       <div class="box">
-        <h1 class="title is-3">Dati riassuntivi</h1>
+        <h1 class="title is-3">Report generale</h1>
 
         <b-taglist attached>
-          <b-tag type="is-large is-light">Vaccini consegnati</b-tag>
-          <b-tag type="is-large is-success">{{ totaleVacciniConsegnati }}</b-tag>
+          <b-tag type="is-large is-info">Vaccini consegnati</b-tag>
+          <b-tag type="is-large is-light">{{ totaleVacciniConsegnati }}</b-tag>
           
-          <b-tag type="is-large is-light">Vaccini somministrati</b-tag>
-          <b-tag type="is-large is-success">{{ totaleVacciniSomministrati }}</b-tag>
+          <b-tag type="is-large is-info">Vaccini somministrati</b-tag>
+          <b-tag type="is-large is-light">{{ totaleVacciniSomministrati }}</b-tag>
+        </b-taglist>
+
+        <b-taglist attached>
+          <div v-for="fornitura in totaleForniture" :key="fornitura.nome">
+            <b-tag type="is-medium is-info">{{ fornitura.nome }}</b-tag>
+            <b-tag type="is-medium is-light">{{ fornitura.totale.toLocaleString() }}</b-tag>
+          </div>
         </b-taglist>
 
         <b-collapse class="card" animation="slide" aria-id="contentIdForA11y3">
@@ -49,7 +56,7 @@
       </div>
 
       <div style="margin-top: 20px">
-        <h1 class="title is-3">Tabella Regioni</h1>
+        <h1 class="title is-3">Situazione Regioni</h1>
 
         <b-table
           :data="vacciniSummary"
@@ -73,13 +80,13 @@
           </b-table-column>
 
           <b-table-column field="percentuale_somministrazione" label="% Somministrazione" sortable centered v-slot="props">
-            <span v-if="props.row.percentuale_somministrazione < 50" class="tag is-medium is-danger">
+            <span v-if="props.row.percentuale_somministrazione < 70" class="tag is-medium is-danger">
               {{ props.row.percentuale_somministrazione }}
             </span>
-            <span v-if="props.row.percentuale_somministrazione >= 50 && props.row.percentuale_somministrazione < 80" class="tag is-medium is-warning">
+            <span v-if="props.row.percentuale_somministrazione >= 70 && props.row.percentuale_somministrazione < 85" class="tag is-medium is-warning">
               {{ props.row.percentuale_somministrazione }}
             </span>
-            <span v-else class="tag is-medium is-success">
+            <span v-if="props.row.percentuale_somministrazione >= 85" class="tag is-medium is-success">
               {{ props.row.percentuale_somministrazione }}
             </span>
           </b-table-column>
@@ -98,25 +105,31 @@
               <div class="content">
                 <b-taglist attached>
                   <b-tag type="is-medium is-white">Prima dose</b-tag>
-                  <b-tag type="is-medium is-info">{{ data[props.row.nome_area].prima_dose.toLocaleString() }}</b-tag>
+                  <b-tag type="is-medium is-info">{{ info[props.row.nome_area].prima_dose.toLocaleString() }}</b-tag>
                   <b-tag type="is-medium is-white">Seconda dose</b-tag>
-                  <b-tag type="is-medium is-info">{{ data[props.row.nome_area].seconda_dose.toLocaleString() }}</b-tag>
+                  <b-tag type="is-medium is-info">{{ info[props.row.nome_area].seconda_dose.toLocaleString() }}</b-tag>
                 </b-taglist>
               </div>
             </article>
-            <div style="margin-top: 20px">
+            <div style="margin-top: 50px">
               <div class="block">
-                Le dosi totali di vaccino somministrate sono {{ data[props.row.nome_area].totale.toLocaleString() }} 
-                ({{ data[props.row.nome_area].sesso_maschile.toLocaleString() }} soggetti di sesso maschile, 
-                {{ data[props.row.nome_area].sesso_femminile.toLocaleString() }} soggetti di sesso femminile). 
+                Le dosi totali di vaccino somministrate sono {{ info[props.row.nome_area].totale.toLocaleString() }} 
+                ({{ info[props.row.nome_area].sesso_maschile.toLocaleString() }} soggetti di sesso maschile, 
+                {{ info[props.row.nome_area].sesso_femminile.toLocaleString() }} soggetti di sesso femminile).<br/>
                 Di queste dosi, 
-                {{ data[props.row.nome_area].categoria_operatori_sanitari_sociosanitari.toLocaleString() }} sono andate agli operatori sanitari / socio-sanitari,
-                {{ data[props.row.nome_area].categoria_personale_non_sanitario.toLocaleString() }} al personale non sanitario,
-                {{ data[props.row.nome_area].categoria_ospiti_rsa.toLocaleString() }} agli ospiti delle RSA,
-                {{ data[props.row.nome_area].categoria_over80.toLocaleString() }} agli over 80.
+                {{ info[props.row.nome_area].categoria_operatori_sanitari_sociosanitari.toLocaleString() }} sono andate agli operatori sanitari / socio-sanitari,
+                {{ info[props.row.nome_area].categoria_personale_non_sanitario.toLocaleString() }} al personale non sanitario,
+                {{ info[props.row.nome_area].categoria_ospiti_rsa.toLocaleString() }} agli ospiti delle RSA,
+                {{ info[props.row.nome_area].categoria_over80.toLocaleString() }} agli over 80. <br/>
+                <strong>Forniture:</strong>
+                <ul>
+                  <li v-for="fornitura in info[props.row.nome_area].forniture" :key="fornitura.nome">
+                    {{ fornitura.nome }}: {{fornitura.totale.toLocaleString()}}
+                  </li>
+                </ul>
               </div>
               <div class="is-hidden-mobile">
-                <forniture-chart v-if="!isLoading" :data="data[props.row.nome_area].forniture" />
+                <forniture-chart v-if="!isLoading" :data="info[props.row.nome_area].forniture" />
               </div>
             </div>
           </template>
@@ -145,6 +158,19 @@ export default {
     },
     totaleVacciniSomministrati() {
       return this.vacciniSummary.reduce((acc, area) => acc + area.dosi_somministrate, 0).toLocaleString();
+    },
+    totaleForniture() {
+      const toRet = [];
+      this.consegneSummary.map(consegna => {
+        const fornitore = consegna.fornitore;
+        const itemIndex = toRet.findIndex(elem => elem.nome === fornitore);
+        if (itemIndex !== -1) {
+          toRet[itemIndex].totale += consegna.numero_dosi;
+        } else {
+          toRet.push({ nome: consegna.fornitore, totale: consegna.numero_dosi });
+        }
+      })
+      return toRet;
     }
   },
   data() {
@@ -153,68 +179,32 @@ export default {
       somministrazioniSummary: [],
       anagraficaSummary: [],
       consegneSummary: [],
-      data: {},
+      info: {},
       isLoading: false,
-      columns: [
-        {
-          field: 'nome_area',
-          label: 'Regione',
-          searchable: true,
-          sortable: true,
-        },
-        {
-          field: 'dosi_somministrate',
-          label: 'Dosi Somministrate',
-          centered: true,
-          sortable: true,
-        },
-        {
-          field: 'dosi_consegnate',
-          label: 'Dosi Consegnate',
-          centered: true,
-          sortable: true,
-        },
-        {
-          field: 'percentuale_somministrazione',
-          label: '% Somministrazione',
-          centered: true,
-          sortable: true,
-        },
-        {
-          field: 'ultimo_aggiornamento',
-          label: 'Ultimo Aggiornamento',
-        }
-      ],
     }
   },
   methods: {
     async loadData() {
       this.isLoading = true;
 
-      const responseVaccini = await fetch(api.API_URL+api.VACCINI_SUMMARY_PATH);
-      const resultVaccini = await responseVaccini.json();
-      this.vacciniSummary = JSON.parse(atob(resultVaccini.content)).data;
-
-      const responseSomministrazioni = await fetch(api.API_URL+api.SOMMINISTRAZIONI_SUMMARY_PATH);
-      const resultSomministrazioni = await responseSomministrazioni.json();
-      this.somministrazioniSummary = JSON.parse(atob(resultSomministrazioni.content)).data;
-
-      const responseAnagrafica = await fetch(api.API_URL+api.ANAGRAFICA_SUMMARY_PATH);
-      const resultAnagrafica = await responseAnagrafica.json();
-      this.anagraficaSummary = JSON.parse(atob(resultAnagrafica.content)).data;
-
-      const responseConsegne = await fetch(api.API_URL+api.CONSEGNE_VACCINI_PATH);
-      const resultConsegne = await responseConsegne.json();
-      this.consegneSummary = JSON.parse(atob(resultConsegne.content)).data;
+      this.vacciniSummary = await api.readDatasetFile(`${api.API_URL}${api.VACCINI_SUMMARY_PATH}`);
+      this.somministrazioniSummary = await api.readDatasetFile(`${api.API_URL}${api.SOMMINISTRAZIONI_SUMMARY_PATH}`);
+      this.anagraficaSummary = await api.readDatasetFile(`${api.API_URL}${api.ANAGRAFICA_SUMMARY_PATH}`);
+      this.consegneSummary = await api.readDatasetFile(`${api.API_URL}${api.CONSEGNE_VACCINI_PATH}`);
       
       this.isLoading = false;
 
-      this.elaborateData(this.data, this.vacciniSummary, this.somministrazioniSummary, this.consegneSummary);
+      this.elaborateData();
     },
-    elaborateData(data, vaccini, somministrazioni, consegne) {
+    elaborateData() {
+      const vaccini = this.vacciniSummary;
+      const somministrazioni = this.somministrazioniSummary;
+      const consegne = this.consegneSummary;
+      const info = this.info;
+
       vaccini.map(summary => {
         const nomeArea = summary.nome_area;
-        data[nomeArea] = {
+        info[nomeArea] = {
           totale: 0,
           sesso_maschile: 0,
           sesso_femminile: 0,
@@ -230,7 +220,7 @@ export default {
         somministrazioni
           .filter(item => item.area == summary.area)
           .map(item => {
-            const dataObj = data[nomeArea];
+            const dataObj = info[nomeArea];
 
             dataObj.totale += item.totale;
             dataObj.sesso_maschile += item.sesso_maschile;
@@ -246,14 +236,14 @@ export default {
         consegne
           .filter(item => item.area === summary.area)
           .map(item => {
-            const elencoForniture = data[nomeArea].forniture;
+            const elencoForniture = info[nomeArea].forniture;
 
             const fornitore = item.fornitore;
-            const itemIndex = elencoForniture.findIndex(elem => elem.name === fornitore);
+            const itemIndex = elencoForniture.findIndex(elem => elem.nome === fornitore);
             if (itemIndex !== -1) {
               elencoForniture[itemIndex].totale += item.numero_dosi;
             } else {
-              elencoForniture.push({ name: item.fornitore, totale: item.numero_dosi });
+              elencoForniture.push({ nome: item.fornitore, totale: item.numero_dosi });
             }
           })
       })
