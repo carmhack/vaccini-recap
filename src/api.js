@@ -5,9 +5,13 @@ const ANAGRAFICA_SUMMARY_PATH = 'dati/anagrafica-vaccini-summary-latest.json';
 const CONSEGNE_VACCINI_PATH = 'dati/consegne-vaccini-latest.json';
 
 const readDatasetFile = async (url) => {
+  let result = null;
   const response = await fetch(url);
-  const result = await response.json();
-  return JSON.parse(atob(result.content)).data;
+  const json = await response.json();
+  if (json.content) {
+    result = JSON.parse(atob(json.content)).data;
+  }
+  return result;
 };
 
 export default {
