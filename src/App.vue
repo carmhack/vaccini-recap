@@ -217,9 +217,10 @@ export default {
           forniture: [],
         }
 
-        somministrazioni
-          .filter(item => item.area == summary.area)
-          .map(item => {
+        if (somministrazioni) {
+          somministrazioni
+            .filter(item => item.area == summary.area)
+            .map(item => {
             const dataObj = info[nomeArea];
 
             dataObj.totale += item.totale;
@@ -232,20 +233,23 @@ export default {
             dataObj.prima_dose += item.prima_dose;
             dataObj.seconda_dose += item.seconda_dose;
           });
+        }
 
-        consegne
-          .filter(item => item.area === summary.area)
-          .map(item => {
-            const elencoForniture = info[nomeArea].forniture;
+        if (consegne) {
+          consegne
+            .filter(item => item.area === summary.area)
+            .map(item => {
+              const elencoForniture = info[nomeArea].forniture;
 
-            const fornitore = item.fornitore;
-            const itemIndex = elencoForniture.findIndex(elem => elem.nome === fornitore);
-            if (itemIndex !== -1) {
-              elencoForniture[itemIndex].totale += item.numero_dosi;
-            } else {
-              elencoForniture.push({ nome: item.fornitore, totale: item.numero_dosi });
-            }
-          })
+              const fornitore = item.fornitore;
+              const itemIndex = elencoForniture.findIndex(elem => elem.nome === fornitore);
+              if (itemIndex !== -1) {
+                elencoForniture[itemIndex].totale += item.numero_dosi;
+              } else {
+                elencoForniture.push({ nome: item.fornitore, totale: item.numero_dosi });
+              }
+            })
+        }
       })
     }
   }
